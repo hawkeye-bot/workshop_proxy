@@ -68,4 +68,5 @@ Vagrant.configure(2) do |config|
   # documentation for more information about their specific syntax and use.
 
    config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
+   config.vm.provision "file", source: "~/.gitignore_global", destination: ".gitignore_global"
 end
