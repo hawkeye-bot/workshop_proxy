@@ -12,7 +12,7 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "hoeckxer/gen_dev"
+  config.vm.box = "ubuntu/trusty64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -69,4 +69,7 @@ Vagrant.configure(2) do |config|
 
    config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
    config.vm.provision "file", source: "~/.gitignore_global", destination: ".gitignore_global"
+   config.vm.provision "shell" do |s|
+	  s.path = "provision.sh"
+   end
 end

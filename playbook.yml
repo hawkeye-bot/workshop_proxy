@@ -1,0 +1,16 @@
+---
+- hosts: nexus
+  remote_user: pi
+  sudo: yes
+  vars:
+    target_folder: "/usr/java"
+    archive_name: "jdk-8u121-linux-arm32-vfp-hflt.tar.gz"
+
+  tasks:
+  - name: Create {{target_folder}} folder
+    file: state=directory path={{target_folder}}
+
+  - unarchive: src="{{archive_name}}" dest="{{target_folder}}" 
+
+  - name: Make Java available for system
+    command: 'update-alternatives --install /usr/bin/java java "{{target_folder}}/jdk1.8.0_121/bin/java" 1000'
