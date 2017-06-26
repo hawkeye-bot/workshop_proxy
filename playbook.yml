@@ -3,14 +3,40 @@
   remote_user: pi
   sudo: yes
   vars:
-    target_folder: "/usr/java"
-    archive_name: "jdk-8u121-linux-arm32-vfp-hflt.tar.gz"
+    jdk_dir: 8u131-b11
+    jdk_archive: jdk-8u131-linux-x64.tar.gz
+    jdk_local_dir: jdk1.8.0_131
+    download_folder: /home/pi
+    java_name: "{{ download_folder }}/{{ jdk_local_dir }}"
+    java_archive: "{{ download_folder }}/{{ jdk_archive }}"
+    download_url: http://download.oracle.com/otn-pub/java/jdk/{{jdk_dir}}/{{jdk_archive}}
+    jdk_tarball_hash: d54c1d3a095b4ff2b6607d096fa80163    
+    java_version: 8
+    java_subversion: 131
+    java_build_custom: 11
+    jdk_version_detail_custom: "{{ java_version }}u{{ java_subversion }}-b{{ java_build_custom }}"
+    jdk_tarball_url: "http://download.oracle.com/otn-pub/java/jdk/{{ jdk_version_detail_custom }}/{{ jdk_tarball_hash }}/{{ jdk_archive }}"
+    archive_name: "jdk-8u131-linux-arm32-vfp-hflt.tar.gz"
 
   tasks:
-  - name: Create {{target_folder}} folder
-    file: state=directory path={{target_folder}}
+  - name: Download Java
+    get_url: 
+      url: "{{ jdk_tarball_url }}"
+      dest: "{{ java_archive }}"
+      headers: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'"
+      validate_certs: no
+      owner: root
+      group: root
+      mode: 744
 
-  - unarchive: src="{{archive_name}}" dest="{{target_folder}}" 
+  - debug:
+      msg: "Stored file {{java_archive}}"
+    
 
-  - name: Make Java available for system
-    command: 'update-alternatives --install /usr/bin/java java "{{target_folder}}/jdk1.8.0_121/bin/java" 1000'
+#  - name: Create {{target_folder}} folder
+#    file: state=directory path={{target_folder}}
+
+#  - unarchive: src="{{archive_name}}" dest="{{target_folder}}" 
+
+#  - name: Make Java available for system
+#    command: 'update-alternatives --install /usr/bin/java java "{{target_folder}}/jdk1.8.0_121/bin/java" 1000'
