@@ -1,5 +1,6 @@
 ---
-- hosts: nexus
+- name: Setup workshop proxy
+  hosts: nexus
   remote_user: pi
   sudo: yes
   vars:
@@ -17,8 +18,13 @@
     jdk_version_detail_custom: "{{ java_version }}u{{ java_subversion }}-b{{ java_build_custom }}"
     jdk_tarball_url: "http://download.oracle.com/otn-pub/java/jdk/{{ jdk_version_detail_custom }}/{{ jdk_tarball_hash }}/{{ jdk_archive }}"
     archive_name: "jdk-8u131-linux-arm32-vfp-hflt.tar.gz"
+    target_folder: "/usr/java"
 
   tasks:
+  - name: Check Java installed
+    command: java -version
+    register: java_installed
+
   - name: Download Java
     get_url: 
       url: "{{ jdk_tarball_url }}"
@@ -28,15 +34,18 @@
       owner: root
       group: root
       mode: 744
+    when: java_installed|failed
 
-  - debug:
-      msg: "Stored file {{java_archive}}"
-    
 
 #  - name: Create {{target_folder}} folder
 #    file: state=directory path={{target_folder}}
 
-#  - unarchive: src="{{archive_name}}" dest="{{target_folder}}" 
+  - name: Extract java
+    unarchive:
+     src: "{{ java_archive }}"
+     dest: "{{ target_folder }}" 
+     remote_src: yes
+    when: java_installed|failed
 
 #  - name: Make Java available for system
 #    command: 'update-alternatives --install /usr/bin/java java "{{target_folder}}/jdk1.8.0_121/bin/java" 1000'
