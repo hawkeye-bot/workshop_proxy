@@ -62,13 +62,15 @@ Vagrant.configure(2) do |config|
   # end
 
    config.ssh.forward_agent = true
-
+  
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
 
    config.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
    config.vm.provision "file", source: "~/.gitignore_global", destination: ".gitignore_global"
+   config.vm.provision "file", source: "~/.ssh/id_rsa_workshop", destination: ".ssh/id_rsa"
+   config.vm.provision "file", source: "~/.ssh/id_rsa_workshop.pub", destination: ".ssh/id_rsa.pub"
    config.vm.provision "shell" do |s|
 	  s.path = "provision.sh"
    end

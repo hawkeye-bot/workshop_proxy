@@ -2,7 +2,6 @@
 - name: Setup workshop proxy
   hosts: nexus
   remote_user: pi
-  sudo: yes
   vars:
     jdk_dir: 8u131-b11
     jdk_archive: jdk-8u131-linux-x64.tar.gz
