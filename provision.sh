@@ -10,3 +10,6 @@ echo "cd /vagrant" >> /home/vagrant/.bashrc
 
 chmod 600 /home/vagrant/.ssh/id_rsa
 chmod 600 /home/vagrant/.ssh/id_rsa.pub
+chmod 777 /etc/ansible
+cp /vagrant/hosts /etc/ansible/hosts
+alias ap='ansible-playbook'
