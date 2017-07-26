@@ -1,0 +1,35 @@
+---
+- name: Check Java installed
+  command: java -version
+  register: java_installed
+  changed_when: false
+  ignore_errors: true
+- name: "Ensures {{ target_folder  }}  dir exists"
+  become: true
+  file: 
+    path: "{{ target_folder }}" 
+    state: directory
+    owner: root
+- name: Download Java
+  get_url:
+    url: "{{ jdk_tarball_url }}"
+    dest: "{{ download_folder }}/{{ java_archive }}"
+    headers: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'"
+    validate_certs: no
+    owner: pi
+    group: pi
+    mode: 777
+  when: java_installed|failed
+- name: Extract java
+  become: true
+  unarchive:
+   src: "{{ download_folder}}/{{ java_archive }}"
+   dest: "{{ target_folder }}"
+   remote_src: yes
+  when: java_installed|failed
+- name: Add java to PATH
+  become: true
+  alternatives:
+    link: /usr/bin/java
+    name: java
+    path: "{{ target_folder }}/{{ extracted_folder }}"

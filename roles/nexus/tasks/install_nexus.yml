@@ -1,0 +1,46 @@
+---
+- name: Create nexus folder
+  file:
+    path: /home/pi/nexus
+    state: directory
+    mode: 0777
+- unarchive:
+    src: http://download.sonatype.com/nexus/3/nexus-3.4.0-02-unix.tar.gz
+    dest: /home/pi/nexus
+    remote_src: true
+    creates: /home/pi/nexus/nexus-3.4.0-02
+- name: Delete Nexus archive
+  file:
+    path: /home/pi/nexus/nexus-3.4.0-02.unix.tar.gz
+    state: absent
+- name: Update min heapspace
+  replace:
+    path: /home/pi/nexus/nexus-3.4.0-02/bin/nexus.vmoptions
+    regexp: "-Xms.*M"
+    replace: "-Xms256M"
+- name: Update max heapspace
+  replace:
+    path: /home/pi/nexus/nexus-3.4.0-02/bin/nexus.vmoptions
+    regexp: "-Xmx.*M"
+    replace: "-Xmx256M"
+- name: Register Nexus as service
+  become: yes
+  template:
+    src: templates/nexusd.j2
+    dest: /etc/init.d/nexusd
+    owner: pi
+    mode: 0755
+- name: Check if nexusd is already installed as a service
+  become: yes
+  shell: "service nexusd status"
+  register: shell_result
+  ignore_errors: true
+- name: Add nexus to update-rc.d
+  become: yes
+  command: "update-rc.d nexusd defaults"
+  when: "shell_result|failed"
+- name: Ensure nexus is started
+  become: yes
+  service:
+    name: nexusd
+    state: started

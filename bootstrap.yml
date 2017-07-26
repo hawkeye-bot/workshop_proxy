@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Add all servers to known_hosts file
+      known_hosts:
+        name: "{{ item }}"
+        key: "{{ lookup('pipe', 'ssh-keyscan {{ item }}, `dig +short {{ item }}`') }}"
+      with_inventory_hostnames:
+        - all
+
+- name: Bootstrap all servers with key of this machine
+  hosts: all
+  remote_user: pi
+  gather_facts: false
+  tasks:
+    - name: Install SSH keys on host
+      authorized_key:
+        key: "{{ lookup('file', '/home/vagrant/.ssh/id_rsa.pub') }}"
+        user: pi

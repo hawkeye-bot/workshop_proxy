@@ -1,0 +1,4 @@
+---
+- name: register service
+  become: yes
+  command: "update-rc.d nexusd defaults"
