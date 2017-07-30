@@ -6,6 +6,7 @@ sudo apt-get install software-properties-common
 sudo apt-add-repository ppa:ansible/ansible
 sudo apt-get update
 sudo apt-get install -y ansible
+sudo apt-get install -y git
 echo "cd /vagrant" >> /home/vagrant/.bashrc
 echo "alias ap='ansible-playbook -i hosts'" >> /home/vagrant/.bashrc
 chmod 600 /home/vagrant/.ssh/id_rsa

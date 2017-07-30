@@ -1,35 +1,70 @@
 ---
-- name: Check Java installed
-  command: java -version
+- name: Check if java is present
+  stat:
+    path: /usr/bin/java/bin/java
   register: java_installed
-  changed_when: false
-  ignore_errors: true
-- name: "Ensures {{ target_folder  }}  dir exists"
-  become: true
-  file: 
-    path: "{{ target_folder }}" 
-    state: directory
-    owner: root
-- name: Download Java
-  get_url:
-    url: "{{ jdk_tarball_url }}"
-    dest: "{{ download_folder }}/{{ java_archive }}"
-    headers: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'"
-    validate_certs: no
-    owner: pi
-    group: pi
-    mode: 777
+# - name: determine if Java is already installed
+#  command: which java
+#  register: java_installed
+#  changed_when: java_installed.rc != 0
+#  failed_when: no
+- block:
+  - name: "Ensures {{ target_folder  }}  dir exists"
+    become: true
+    file: 
+      path: "{{ target_folder }}" 
+      state: directory
+      owner: root
+  - name: Download Java
+    get_url:
+      url: "{{ jdk_tarball_url }}"
+      dest: "{{ download_folder }}/{{ java_archive }}"
+      headers: "Cookie:' gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie'"
+      validate_certs: no
+      owner: pi
+      group: pi
+      mode: 777
+  - name: Extract java
+    become: true
+    unarchive:
+     src: "{{ download_folder}}/{{ java_archive }}"
+     dest: "{{ target_folder }}"
+     remote_src: yes
+  - name: Update alternatives for /usr/bin/java
+    become: true
+    alternatives:
+      link: /usr/bin/java
+      name: java
+      path: "{{ target_folder }}/{{ extracted_folder }}"
+  - name: Add java path to profile system-wide
+    become: true
+    template: src=java.sh.j2 dest=/etc/profile.d/java.sh owner=root group=root mode=0755
+#- name: Checks if the environment file already has an entry for the PATH
+#  become: true
+#  replace:
+#    dest=/etc/environment
+#    regexp="PATH=(.*)"
+#    replace="PATH=\1"
+#  register: checkIfPATHIsHere
+#- name: Add a PATH entry with {{java_symlink}} if the PATH is not already defined
+#  become: true
+#  lineinfile:
+#    dest: /etc/environment
+#    state: present
+#    line: "PATH={{java_symlink}}/bin"
+#    regexp: ''
+#    insertafter: EOF
+#  when: checkIfPATHIsHere.changed == false
+#- name: add {{extrapath}} to the PATH 
+#  lineinfile:
+#    dest: /etc/environment
+#    state: present
+#    backrefs: no
+#    regexp: 'PATH=(["])((?!.?{{extrapath}}).?)(["])$'
+#    line: "PATH=\1\2:{{extra_path}}\3" 
+#  when: checkIfPATHIsHere.changed
+#  - name: Add java path to profile system-wide
+#    sudo: yes
+#    template: src=java.sh.j2 dest=/etc/profile.d/java.sh owner=root group=root mode=0755
+#    tags:
   when: java_installed|failed
-- name: Extract java
-  become: true
-  unarchive:
-   src: "{{ download_folder}}/{{ java_archive }}"
-   dest: "{{ target_folder }}"
-   remote_src: yes
-  when: java_installed|failed
-- name: Add java to PATH
-  become: true
-  alternatives:
-    link: /usr/bin/java
-    name: java
-    path: "{{ target_folder }}/{{ extracted_folder }}"
