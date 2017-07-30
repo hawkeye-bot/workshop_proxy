@@ -1,4 +1,5 @@
 ---
+remote_user: pi
 extracted_folder: jdk1.8.0_141
 java_archive: jdk-8u141-linux-arm32-vfp-hflt.tar.gz
 download_folder: /home/pi
