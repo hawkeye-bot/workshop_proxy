@@ -67,4 +67,4 @@
 #    sudo: yes
 #    template: src=java.sh.j2 dest=/etc/profile.d/java.sh owner=root group=root mode=0755
 #    tags:
-  when: java_installed|failed
+  when: not java_installed.stat.exists
